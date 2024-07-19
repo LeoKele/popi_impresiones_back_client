@@ -21,13 +21,24 @@ public class ControladorAdmin extends ControladorBase {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
 
-        String query = "SELECT * FROM productos";
-
+        String query;
+        String idParam = request.getParameter("id");
+        //String tituloParam = request.getParameter("titulo") //titulo like %tituloParam%
+        if (idParam != null){
+            query = "SELECT * FROM productos WHERE id_producto = ?";
+        } else {
+            query = "SELECT * FROM productos";
+        }
         //Try-with-resources para cerrar correctamente la conexion
         try (Connection conn = obtenerConexion();
-             Statement statement = conn.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
+            PreparedStatement statement = conn.prepareStatement(query)) {
+            
+            if (idParam != null){
+                statement.setLong(1, Long.parseLong(idParam));
+            }
 
+            ResultSet resultSet = statement.executeQuery();
+            
             List<ProductoAdmin> productos = new ArrayList<>();
 
             while (resultSet.next()) {

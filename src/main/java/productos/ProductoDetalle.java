@@ -1,4 +1,5 @@
 package productos;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 // import java.util.ArrayList;
 // import java.util.List;
@@ -16,12 +17,13 @@ public class ProductoDetalle extends ProductoBase{
         this.imagenes = imagenes;
     }
     
+    @JsonProperty("imagenes")
     public String getImagen() {
         return imagenes;
     }
 
-    public void setImagen(String imagen) {
-        this.imagenes = imagen;
+    public void setImagen(String imagenes) {
+        this.imagenes = imagenes;
     }
 
 

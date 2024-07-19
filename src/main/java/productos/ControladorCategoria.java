@@ -21,13 +21,25 @@ public class ControladorCategoria extends ControladorBase{
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
 
-        String query = "SELECT * FROM categoria_productos";
+        // String query = "SELECT * FROM categoria_productos";
+        String query;
+        String idParam = request.getParameter("id");
+
+        if (idParam != null){
+            query = "SELECT * FROM categoria_productos WHERE id_categoria = ?";
+        } else {
+            query = "SELECT * FROM categoria_productos";
+        }
 
         //Try-with-resources para cerrar correctamente la conexion
         try (Connection conn = obtenerConexion();
-             Statement statement = conn.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
+             PreparedStatement statement = conn.prepareStatement(query)) {
 
+            if (idParam != null){
+                statement.setLong(1, Long.parseLong(idParam));
+            }
+
+            ResultSet resultSet = statement.executeQuery();
             List<Categoria> categorias = new ArrayList<>();
 
             while (resultSet.next()) {

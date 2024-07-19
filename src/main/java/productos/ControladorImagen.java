@@ -21,13 +21,24 @@ public class ControladorImagen extends ControladorBase{
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
 
-        String query = "SELECT * FROM imagenes_productos";
+        // String query = "SELECT * FROM imagenes_productos ORDER BY id_producto ASC";
+        String query;
+        String idParam = request.getParameter("id");
+
+        if (idParam != null){
+            query = "SELECT * FROM imagenes_productos WHERE id = ?";
+        } else {
+            query = "SELECT * FROM imagenes_productos ORDER BY id_producto, img_path ASC";
+        }
 
         //Try-with-resources para cerrar correctamente la conexion
         try (Connection conn = obtenerConexion();
-             Statement statement = conn.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-
+             PreparedStatement statement = conn.prepareStatement(query)) {
+            
+            if (idParam != null){
+                statement.setLong(1, Long.parseLong(idParam));
+            }
+            ResultSet resultSet = statement.executeQuery();
             List<Imagen> imagenes = new ArrayList<>();
 
             while (resultSet.next()) {
@@ -69,10 +80,10 @@ public class ControladorImagen extends ControladorBase{
             // Configuramos la respuesta como JSON
             try (ResultSet rs = statement.getGeneratedKeys()) {
                 if (rs.next()) {
-                    Long id = rs.getLong(1);
+                    Long idImg = rs.getLong(1);
 
                     response.setContentType("application/json");
-                    String json = mapper.writeValueAsString(id);
+                    String json = mapper.writeValueAsString(idImg);
                     response.getWriter().write(json);
                 }
             }
@@ -110,9 +121,11 @@ public class ControladorImagen extends ControladorBase{
         } catch (SQLException e) {
             e.printStackTrace(); // Imprimir el error en caso de problemas con la base de datos
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // Configurar el código de estado de la respuesta HTTP como 500 (INTERNAL SERVER ERROR)
+            response.getWriter().write("{\"message\": \"" + e.getMessage() + "\"}"); // Devolver el mensaje de error de la base de datos
         } catch (IOException e) {
             e.printStackTrace(); // Imprimir el error en caso de problemas de entrada/salida
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // Configurar el código de estado de la respuesta HTTP como 500 (INTERNAL SERVER ERROR)
+            response.getWriter().write("{\"message\": \"" + e.getMessage() + "\"}"); // Devolver el mensaje de error de entrada/salida
         }
     }
     
