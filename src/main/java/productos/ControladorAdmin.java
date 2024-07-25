@@ -23,18 +23,34 @@ public class ControladorAdmin extends ControladorBase {
 
         String query;
         String idParam = request.getParameter("id");
+        String listadoParam = request.getParameter("listado");
         //String tituloParam = request.getParameter("titulo") //titulo like %tituloParam%
-        if (idParam != null){
-            query = "SELECT * FROM productos WHERE id_producto = ?";
+
+        // Construir la consulta SQL de manera dinámica
+        if (idParam != null) {
+            // Si se proporciona idParam, se incluye en la consulta
+            query = "SELECT * FROM productos WHERE id_producto = ? AND listado = ?";
         } else {
-            query = "SELECT * FROM productos";
+            // Si no se proporciona idParam, se usa el valor de listadoParam si está presente
+            if (listadoParam != null) {
+                query = "SELECT * FROM productos WHERE listado = ?";
+            } else {
+                query = "SELECT * FROM productos"; // Consulta por defecto si no se proporciona listadoParam
+            }
         }
+
         //Try-with-resources para cerrar correctamente la conexion
         try (Connection conn = obtenerConexion();
             PreparedStatement statement = conn.prepareStatement(query)) {
             
-            if (idParam != null){
-                statement.setLong(1, Long.parseLong(idParam));
+            // Establecer los parámetros de la consulta según el caso
+            int paramIndex = 1;
+            if (idParam != null) {
+                statement.setLong(paramIndex++, Long.parseLong(idParam));
+            }
+            if (listadoParam != null || idParam == null) {
+                // Si listadoParam no es nulo o no hay idParam, agregar el parámetro de listado
+                statement.setInt(paramIndex, Integer.parseInt(listadoParam != null ? listadoParam : "1")); // Por defecto listado = 1 si no se especifica
             }
 
             ResultSet resultSet = statement.executeQuery();
@@ -47,7 +63,8 @@ public class ControladorAdmin extends ControladorBase {
                         resultSet.getString("nombre_producto"),
                         resultSet.getString("descripcion_producto"),
                         resultSet.getDouble("precio_producto"),
-                        resultSet.getLong("id_categoria")
+                        resultSet.getLong("id_categoria"),
+                        resultSet.getInt("listado")
                 );
                 productos.add(producto);
             }
@@ -69,7 +86,7 @@ public class ControladorAdmin extends ControladorBase {
 
         try (Connection conn = obtenerConexion();
              PreparedStatement statement = conn.prepareStatement(
-                "INSERT INTO productos (nombre_producto, descripcion_producto, id_categoria, precio_producto) VALUES (?, ?, ?, ?)", 
+                "INSERT INTO productos (nombre_producto, descripcion_producto, id_categoria, precio_producto, listado) VALUES (?, ?, ?, ?, ?)", 
                 Statement.RETURN_GENERATED_KEYS)) {
 
             ObjectMapper mapper = new ObjectMapper();
@@ -79,6 +96,7 @@ public class ControladorAdmin extends ControladorBase {
             statement.setString(2, producto.getDescripcion());
             statement.setLong(3, producto.getIdCategoria());
             statement.setDouble(4, producto.getPrecio());
+            statement.setInt(5, producto.getListado());
             statement.executeUpdate();
 
             try (ResultSet rs = statement.getGeneratedKeys()) {
@@ -102,7 +120,7 @@ public class ControladorAdmin extends ControladorBase {
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
-        String query = "UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, id_categoria = ?, precio_producto = ? WHERE id_producto = ?";
+        String query = "UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, id_categoria = ?, precio_producto = ?, listado = ? WHERE id_producto = ?";
         try(Connection conn = obtenerConexion();
         PreparedStatement statement = conn.prepareStatement(query)) {
 
@@ -115,7 +133,8 @@ public class ControladorAdmin extends ControladorBase {
             statement.setString(2, producto.getDescripcion());
             statement.setLong(3, producto.getIdCategoria());
             statement.setDouble(4, producto.getPrecio());
-            statement.setLong(5, producto.getId());
+            statement.setInt(5, producto.getListado());
+            statement.setLong(6, producto.getId());
 
             // Ejecutar la consulta de actualización
             int rowsUpdated = statement.executeUpdate();

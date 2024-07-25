@@ -5,14 +5,19 @@ public class ProductoBase {
     private Long id;
     private String nombre;
     private String descripcion;
-    private double precio;
+    private Double precio;
 
 
-    public ProductoBase(Long id, String nombre, String descripcion, double precio ){
+    public ProductoBase(Long id, String nombre, String descripcion, Double precio ){
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
+    }
+
+    public ProductoBase(long id, String nombre){
+        this.id = id;
+        this.nombre = nombre;
     }
 
     //Constructor vacio necesario para deserializacion de JSON
@@ -43,11 +48,11 @@ public class ProductoBase {
         this.descripcion = descripcion;
     }
 
-    public double getPrecio() {
+    public Double getPrecio() {
         return precio;
     }
 
-    public void setPrecio(double precio) {
+    public void setPrecio(Double precio) {
         this.precio = precio;
     }
     
