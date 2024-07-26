@@ -20,7 +20,7 @@ public class ControladorDetalle extends ControladorBase {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
 
-        String query = "SELECT p.id_producto AS id, p.nombre_producto AS nombre, p.descripcion_producto AS descripcion, p.precio_producto AS precio, GROUP_CONCAT(i.img_path ORDER BY i.img_path SEPARATOR ',') AS imagenes FROM productos p LEFT JOIN imagenes_productos i ON p.id_producto = i.id_producto GROUP BY p.id_producto;";
+        String query = "SELECT p.id_producto AS id, p.nombre_producto AS nombre, p.descripcion_producto AS descripcion, p.precio_producto AS precio, GROUP_CONCAT(i.img_path ORDER BY i.img_path SEPARATOR ',') AS imagenes FROM productos p LEFT JOIN imagenes_productos i ON p.id_producto = i.id_producto WHERE listado = 1 GROUP BY p.id_producto;";
 
         //Try-with-resources para cerrar correctamente la conexion
         try (Connection conn = obtenerConexion();
