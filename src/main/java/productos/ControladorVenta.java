@@ -142,6 +142,12 @@ public class ControladorVenta extends ControladorBase {
             ObjectMapper mapper = JsonConfig.createObjectMapper();  // Crear un objeto ObjectMapper para convertir JSON a objetos Java
             Venta venta = mapper.readValue(request.getInputStream(), Venta.class);  // Convertir el JSON de la solicitud a un objeto Pelicula
 
+            // Verificar si el producto existe antes de realizar la operación
+            if (!productoService.productoExiste(venta.getIdProducto())) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"message\": \"El ID de producto no existe.\"}");
+                return;
+            }
 
             // Establecer los parámetros de la consulta de actualización
             statement.setLong(1, venta.getIdProducto());

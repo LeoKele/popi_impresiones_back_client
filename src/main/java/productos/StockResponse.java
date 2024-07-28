@@ -1,24 +1,24 @@
 package productos;
 
 public class StockResponse {
-    private long idStock;
+    private long id;
     private Long idProducto;
     private Long cantidad;
 
     public StockResponse() {}
 
-    public StockResponse(long idStock, Long idProducto, Long cantidad) {
-        this.idStock = idStock;
+    public StockResponse(long id, Long idProducto, Long cantidad) {
+        this.id = id;
         this.idProducto = idProducto;
         this.cantidad = cantidad;
     }
 
-    public long getIdStock() {
-        return idStock;
+    public long getId() {
+        return id;
     }
 
-    public void setIdStock(long idStock) {
-        this.idStock = idStock;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Long getIdProducto() {

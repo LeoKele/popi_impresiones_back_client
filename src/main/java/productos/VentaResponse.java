@@ -3,7 +3,7 @@ package productos;
 import java.time.LocalDate;
 //Esta clase representa los datos de salida, mientras que "Venta" representa los de entrada
 public class VentaResponse {
-    private Long idVenta;
+    private Long id;
     private Long idProducto;
     private String nombre;
     private LocalDate fechaVenta;
@@ -13,8 +13,8 @@ public class VentaResponse {
     private Double ganancia;
 
     // Constructor, getters y setters
-    public VentaResponse(Long idVenta, Long idProducto, String nombre, LocalDate fechaVenta, Long cantidad, Double precioUnitario, Double total, Double ganancia) {
-        this.idVenta = idVenta;
+    public VentaResponse(Long id, Long idProducto, String nombre, LocalDate fechaVenta, Long cantidad, Double precioUnitario, Double total, Double ganancia) {
+        this.id = id;
         this.idProducto = idProducto;
         this.nombre = nombre;
         this.fechaVenta = fechaVenta;
@@ -24,12 +24,12 @@ public class VentaResponse {
         this.ganancia = ganancia;
     }
 
-    public Long getIdVenta() {
-        return idVenta;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdVenta(Long idVenta) {
-        this.idVenta = idVenta;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getIdProducto() {

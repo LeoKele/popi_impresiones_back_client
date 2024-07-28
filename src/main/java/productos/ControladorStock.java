@@ -129,6 +129,13 @@ public class ControladorStock extends ControladorBase{
             PreparedStatement statement = conn.prepareStatement(query)) {
             ObjectMapper mapper = new ObjectMapper();
             Stock stock = mapper.readValue(request.getInputStream(), Stock.class);
+
+            //* */ Verificar si el producto existe antes de insertar en stock
+            if (!productoService.productoExiste(stock.getIdProducto())) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"message\": \"El ID de producto no existe.\"}");
+                return;
+            }
     
             // Establecer los parámetros de la consulta de actualización
             statement.setLong(1, stock.getIdProducto());

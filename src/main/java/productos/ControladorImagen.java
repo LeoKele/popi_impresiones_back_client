@@ -121,11 +121,20 @@ public class ControladorImagen extends ControladorBase{
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
         String query = "UPDATE imagenes_productos SET id_producto = ?, img_path = ? WHERE id = ?";
+
         try (Connection conn = obtenerConexion();
             PreparedStatement statement = conn.prepareStatement(query)) {
+
             ObjectMapper mapper = new ObjectMapper();
             Imagen imagen = mapper.readValue(request.getInputStream(), Imagen.class);
-    
+            
+            // Verificar si el nuevo idProducto existe
+            if (!productoService.productoExiste(imagen.getIdProducto())) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"message\": \"El ID de producto no existe.\"}");
+                return;
+            }
+            
             // Establecer los parámetros de la consulta de actualización
             statement.setLong(1, imagen.getIdProducto());
             statement.setString(2, imagen.getImgPath());
