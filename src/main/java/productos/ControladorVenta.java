@@ -22,6 +22,14 @@ import java.util.List;
 @WebServlet("/ventas")
 public class ControladorVenta extends ControladorBase {
 
+    private ProductoService productoService;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        this.productoService = new ProductoService();
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
@@ -78,13 +86,24 @@ public class ControladorVenta extends ControladorBase {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
 
+        ObjectMapper mapper = JsonConfig.createObjectMapper();
+        Venta venta = mapper.readValue(request.getInputStream(), Venta.class);
+
+        // Verificar si el producto existe antes de realizar la operación
+        if (!productoService.productoExiste(venta.getIdProducto())) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"message\": \"El ID de producto no existe.\"}");
+            return;
+        }
+
+        String query = "INSERT INTO ventas (id_producto, fecha_venta, cantidad, precio_unitario) VALUES (?, ?, ?, ?)";
+
         try (Connection conn = obtenerConexion();
              PreparedStatement statement = conn.prepareStatement(
-                "INSERT INTO ventas (id_producto, fecha_venta, cantidad, precio_unitario) VALUES (?, ?, ?, ?)", 
+                query,
                 Statement.RETURN_GENERATED_KEYS)) {
 
-            ObjectMapper mapper = JsonConfig.createObjectMapper();
-            Venta venta = mapper.readValue(request.getInputStream(), Venta.class);
+
 
             statement.setLong(1, venta.getIdProducto());
             statement.setDate(2, Date.valueOf(venta.getFechaVenta()));
@@ -96,9 +115,12 @@ public class ControladorVenta extends ControladorBase {
                 if (rs.next()) {
                     Long idVenta = rs.getLong(1);
 
+                    VentaResponse ventaResponse = new VentaResponse(idVenta, venta.getIdProducto(), venta.getNombre(), venta.getFechaVenta(), venta.getCantidad(), venta.getPrecioUnitario(), venta.getTotal(), venta.getGanancia());
                     response.setContentType("application/json");
-                    String json = mapper.writeValueAsString(idVenta);
+                    String json = mapper.writeValueAsString(ventaResponse);
                     response.getWriter().write(json);
+                } else {
+                    throw new SQLException("Error al crear la venta, ningun id obtenido");
                 }
             }
 

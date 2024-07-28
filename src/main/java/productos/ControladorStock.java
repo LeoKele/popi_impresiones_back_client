@@ -20,6 +20,14 @@ import java.util.List;
 @WebServlet("/stock")
 public class ControladorStock extends ControladorBase{
 
+    private ProductoService productoService;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        this.productoService = new ProductoService();
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
@@ -67,13 +75,22 @@ public class ControladorStock extends ControladorBase{
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
+
+        ObjectMapper mapper = new ObjectMapper();
+        Stock stock = mapper.readValue(request.getInputStream(), Stock.class);
+
+        //* */ Verificar si el producto existe antes de insertar en stock
+        if (!productoService.productoExiste(stock.getIdProducto())) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"message\": \"El ID de producto no existe.\"}");
+            return;
+        }
         String query = "INSERT INTO stock (id_producto, cantidad) VALUES (?, ?)";
         
         try (Connection conn = obtenerConexion();
              PreparedStatement statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             
-            ObjectMapper mapper = new ObjectMapper();
-            Stock stock = mapper.readValue(request.getInputStream(), Stock.class);
+
             
             statement.setLong(1, stock.getIdProducto());
             statement.setLong(2, stock.getCantidad());

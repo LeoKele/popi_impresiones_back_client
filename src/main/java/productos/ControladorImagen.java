@@ -17,6 +17,15 @@ import java.util.List;
 @WebServlet("/imagenes")
 public class ControladorImagen extends ControladorBase{
 
+    private ProductoService productoService;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        this.productoService = new ProductoService();
+    }
+
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
@@ -64,14 +73,24 @@ public class ControladorImagen extends ControladorBase{
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
+
+        ObjectMapper mapper = new ObjectMapper();
+        Imagen imagen = mapper.readValue(request.getInputStream(), Imagen.class);
+
+        //* */ Verificar si el producto existe antes de insertar en stock
+        if (!productoService.productoExiste(imagen.getIdProducto())) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"message\": \"El ID de producto no existe.\"}");
+            return;
+        }
+
         String query = "INSERT INTO imagenes_productos (id_producto, img_path) VALUES (?,?)";
         try (Connection conn = obtenerConexion();
              PreparedStatement statement = conn.prepareStatement(
                 query, 
                 Statement.RETURN_GENERATED_KEYS)) {
 
-            ObjectMapper mapper = new ObjectMapper();
-            Imagen imagen = mapper.readValue(request.getInputStream(), Imagen.class);
+
             
             statement.setLong(1, imagen.getIdProducto());
             statement.setString(2, imagen.getImgPath());
@@ -82,9 +101,13 @@ public class ControladorImagen extends ControladorBase{
                 if (rs.next()) {
                     Long idImg = rs.getLong(1);
 
+                    ImagenResponse imagenResponse = new ImagenResponse(idImg, imagen.getIdProducto(), imagen.getImgPath());
+
                     response.setContentType("application/json");
-                    String json = mapper.writeValueAsString(idImg);
+                    String json = mapper.writeValueAsString(imagenResponse);
                     response.getWriter().write(json);
+                } else {
+                    throw new SQLException("Error al crear imagen, ningún ID fue obtenido.");
                 }
             }
             response.setStatus(HttpServletResponse.SC_CREATED);

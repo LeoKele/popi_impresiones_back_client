@@ -7,15 +7,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ProductoAdmin extends ProductoBase{
     private Long idCategoria;
+    private Double costo;
     private int listado;
 
 
     //Constructor vacio necesario para deserializacion de JSON
     public ProductoAdmin() {}
 
-    public ProductoAdmin(Long id, String nombre, String descripcion, double precio, Long idCategoria, int listado) {
+    public ProductoAdmin(Long id, String nombre, String descripcion, double precio, Long idCategoria, Double costo, int listado) {
         super(id, nombre, descripcion, precio);
         this.idCategoria = idCategoria;
+        this.costo = costo;
         this.listado = listado;
     }
 
@@ -34,6 +36,13 @@ public class ProductoAdmin extends ProductoBase{
     }
     public void setListado(int listado){
         this.listado = listado;
+    }
+
+    public Double getCosto(){
+        return costo;
+    }
+    public void setCosto(Double costo){
+        this.costo = costo;
     }
 
 }
