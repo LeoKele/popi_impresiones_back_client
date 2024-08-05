@@ -45,7 +45,8 @@ public class ControladorCategoria extends ControladorBase{
             while (resultSet.next()) {
                 Categoria categoria = new Categoria(
                         resultSet.getLong("id_categoria"),
-                        resultSet.getString("descripcion_categoria")
+                        resultSet.getString("descripcion_categoria"),
+                        resultSet.getInt("listado")
                 );
                 categorias.add(categoria);
             }
@@ -64,7 +65,7 @@ public class ControladorCategoria extends ControladorBase{
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
-        String query = "INSERT INTO categoria_productos (descripcion_categoria) VALUES (?)";
+        String query = "INSERT INTO categoria_productos (descripcion_categoria, listado) VALUES (?,?)";
 
         try (Connection conn = obtenerConexion();
              PreparedStatement statement = conn.prepareStatement(
@@ -75,6 +76,7 @@ public class ControladorCategoria extends ControladorBase{
             Categoria categoria = mapper.readValue(request.getInputStream(), Categoria.class);
 
             statement.setString(1, categoria.getDescripcion());
+            statement.setInt(2, categoria.getListado());
             statement.executeUpdate();
 
             try (ResultSet rs = statement.getGeneratedKeys()) {
@@ -97,7 +99,7 @@ public class ControladorCategoria extends ControladorBase{
     }
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
-        String query = "UPDATE categoria_productos SET descripcion_categoria = ? WHERE id_categoria = ?";
+        String query = "UPDATE categoria_productos SET descripcion_categoria = ?, listado = ? WHERE id_categoria = ?";
         try(Connection conn = obtenerConexion();
         PreparedStatement statement = conn.prepareStatement(query)) {
 
@@ -107,7 +109,8 @@ public class ControladorCategoria extends ControladorBase{
 
             // Establecer los parámetros de la consulta de actualización
             statement.setString(1, categoria.getDescripcion());
-            statement.setLong(2, categoria.getId());
+            statement.setInt(2, categoria.getListado());
+            statement.setLong(3, categoria.getId());
 
             // Ejecutar la consulta de actualización
             int rowsUpdated = statement.executeUpdate();
