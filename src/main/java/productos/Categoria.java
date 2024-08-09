@@ -1,11 +1,9 @@
 package productos;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Categoria {
     private Long id;
     private String descripcion;
-    @JsonIgnore
     private int listado;
 
     public Categoria(){}

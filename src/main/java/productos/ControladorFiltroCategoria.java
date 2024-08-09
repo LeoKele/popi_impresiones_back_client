@@ -27,16 +27,15 @@ public class ControladorFiltroCategoria extends ControladorBase {
         try (Connection conn = obtenerConexion();
              PreparedStatement statement = conn.prepareStatement(query)) {
 
-
             ResultSet resultSet = statement.executeQuery();
-            List<Categoria> categorias = new ArrayList<>();
+            List<CategoriaDTO> categorias = new ArrayList<>();
 
             while (resultSet.next()) {
-                Categoria categoria = new Categoria(
+                CategoriaDTO categoriaDTO = new CategoriaDTO(
                         resultSet.getLong("id_categoria"),
                         resultSet.getString("descripcion_categoria")
                 );
-                categorias.add(categoria);
+                categorias.add(categoriaDTO);
             }
 
             ObjectMapper mapper = new ObjectMapper();
