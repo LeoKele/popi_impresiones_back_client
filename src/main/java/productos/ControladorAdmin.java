@@ -29,11 +29,11 @@ public class ControladorAdmin extends ControladorBase {
         // Construir la consulta SQL de manera dinámica
         if (idParam != null) {
             // Si se proporciona idParam, se incluye en la consulta
-            query = "SELECT * FROM productos WHERE id_producto = ? AND listado = ?";
+            query = "SELECT * FROM productos WHERE id_producto = ? AND listado = ? ORDER BY id_producto DESC";
         } else {
             // Si no se proporciona idParam, se usa el valor de listadoParam si está presente
             if (listadoParam != null) {
-                query = "SELECT * FROM productos WHERE listado = ?";
+                query = "SELECT * FROM productos WHERE listado = ? ORDER BY id_producto DESC";
             } else {
                 query = "SELECT * FROM productos"; // Consulta por defecto si no se proporciona listadoParam
             }

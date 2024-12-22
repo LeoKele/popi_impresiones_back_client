@@ -37,7 +37,7 @@ public class ControladorImagen extends ControladorBase{
         if (idParam != null){
             query = "SELECT * FROM imagenes_productos WHERE id = ?";
         } else {
-            query = "SELECT * FROM imagenes_productos ORDER BY id_producto, img_path ASC";
+            query = "SELECT * FROM imagenes_productos ORDER BY `imagenes_productos`.`id_producto` DESC;";
         }
 
         //Try-with-resources para cerrar correctamente la conexion
