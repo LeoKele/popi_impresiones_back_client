@@ -29,27 +29,32 @@ public class ControladorImagen extends ControladorBase{
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         configurarCORS(response);
-
-        // String query = "SELECT * FROM imagenes_productos ORDER BY id_producto ASC";
+    
         String query;
         String idParam = request.getParameter("id");
-
-        if (idParam != null){
+        String productoIdParam = request.getParameter("productoId"); // Nuevo parámetro
+    
+        if (idParam != null) {
             query = "SELECT * FROM imagenes_productos WHERE id = ?";
+        } else if (productoIdParam != null) {
+            query = "SELECT * FROM imagenes_productos WHERE id_producto = ?"; // Filtrar por id_producto en el front 
         } else {
             query = "SELECT * FROM imagenes_productos ORDER BY `imagenes_productos`.`id_producto` DESC;";
         }
-
-        //Try-with-resources para cerrar correctamente la conexion
+    
+        // Try-with-resources para cerrar correctamente la conexión
         try (Connection conn = obtenerConexion();
              PreparedStatement statement = conn.prepareStatement(query)) {
-            
-            if (idParam != null){
+    
+            if (idParam != null) {
                 statement.setLong(1, Long.parseLong(idParam));
+            } else if (productoIdParam != null) {
+                statement.setLong(1, Long.parseLong(productoIdParam));
             }
+    
             ResultSet resultSet = statement.executeQuery();
             List<Imagen> imagenes = new ArrayList<>();
-
+    
             while (resultSet.next()) {
                 Imagen imagen = new Imagen(
                         resultSet.getLong("id"),
@@ -58,17 +63,18 @@ public class ControladorImagen extends ControladorBase{
                 );
                 imagenes.add(imagen);
             }
-
+    
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(imagenes);
-
+    
             response.setContentType("application/json");
             response.getWriter().write(json);
-
+    
         } catch (Exception e) {
             manejarError(response, e);
         }
     }
+    
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
